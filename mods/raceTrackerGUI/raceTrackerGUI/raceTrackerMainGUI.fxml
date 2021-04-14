@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane maxHeight="-Infinity" maxWidth="-Infinity"
+	minHeight="-Infinity" minWidth="-Infinity" prefHeight="902.0"
+	prefWidth="1350.0" xmlns="http://javafx.com/javafx/15.0.1"
+	xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="raceTrackerGUI.MainController">
+	<top>
+		<BorderPane prefHeight="24.0" prefWidth="1800.0"
+			BorderPane.alignment="CENTER">
+			<left>
+				<HBox prefHeight="100.0" prefWidth="200.0"
+					BorderPane.alignment="CENTER">
+					<children>
+						<Label text="Track Name:" />
+						<Label fx:id="lblTrackName" text="-" />
+					</children>
+				</HBox>
+			</left>
+			<right>
+				<HBox prefHeight="100.0" prefWidth="200.0"
+					BorderPane.alignment="CENTER">
+					<children>
+						<Label fx:id="lblLapDescription" text="-" />
+					</children>
+				</HBox>
+			</right>
+		</BorderPane>
+	</top>
+	<left>
+		<VBox prefHeight="900.0" prefWidth="150.0">
+			<children>
+				<Button fx:id="btnShowStandings" mnemonicParsing="false"
+					text="Standings" />
+				<Button fx:id="btnShowTrackPosition" mnemonicParsing="false"
+					text="Track Position" />
+			</children>
+		</VBox>
+	</left>
+	<center>
+		<VBox fx:id="vBoxMain" prefHeight="200.0" prefWidth="100.0"
+			BorderPane.alignment="CENTER">
+			<children>
+				<Pane fx:id="paneMain" prefHeight="200.0" prefWidth="200.0">
+					<children>
+						<TableView fx:id="tblCurStandings" prefHeight="849.0"
+							prefWidth="1800.0">
+							<columns>
+								<TableColumn fx:id="colRacePos" prefWidth="30.0"
+									text="Pos" />
+								<TableColumn fx:id="colDeltaPos" prefWidth="30.0"
+									text="+/-" />
+								<TableColumn fx:id="colResultStatus"
+									prefWidth="50.0" text="Status" />
+								<TableColumn fx:id="colDriverName" prefWidth="200.0"
+									text="Driver Name" />
+								<TableColumn fx:id="colLapDescription"
+									prefWidth="250.0" text="Lap Description" />
+								<TableColumn fx:id="colS1" prefWidth="250.0"
+									text="S1" />
+								<TableColumn fx:id="colS2" prefWidth="250.0"
+									text="S2" />
+								<TableColumn fx:id="colS3" prefWidth="250.0"
+									text="S3" />
+								<TableColumn fx:id="colPitStatus" prefWidth="100.0"
+									text="Pit Status" />
+								<TableColumn fx:id="colPenalties" prefWidth="100.0"
+									text="Penalties" />
+							</columns>
+						</TableView>
+					</children>
+				</Pane>
+			</children>
+		</VBox>
+	</center>
+
+	<bottom>
+		<HBox prefHeight="20.0" prefWidth="1800.0"
+			BorderPane.alignment="CENTER">
+			<children>
+				<Label text="Suggested Gear:" />
+				<Label fx:id="lblSuggestedGear" text="-" />
+			</children>
+		</HBox>
+	</bottom>
+</BorderPane>
