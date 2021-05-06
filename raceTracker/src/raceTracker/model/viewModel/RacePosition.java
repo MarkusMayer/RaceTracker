@@ -5,7 +5,7 @@ import java.time.Duration;
 import raceTracker.model.enums.Driver;
 import raceTracker.model.enums.PitStatus;
 import raceTracker.model.enums.ResultStatus;
-import raceTracker.model.gameStructs.Lap;
+import raceTracker.model.gameStructs.LapStruct;
 import raceTracker.model.gameStructs.Participant;
 
 public final class RacePosition {
@@ -13,77 +13,142 @@ public final class RacePosition {
 	private final int curPosition;
 	private final String driverName;
 	private final Driver driverId;
-	private final int currentLapNum, deltaPosition, bestLapNr, bestOverallS1LapNum, bestOverallS2LapNum,
-			bestOverallS3LapNum, penalties;
-	private final Duration lastLapTime, bestLapTime, deltaLastBestLap, curLapTime, s1, s2, bestLapS1Time, bestLapS2Time,
-			bestLapS3Time, bestOverallS1Time, bestOverallS2Time, bestOverallS3Time, deltaS1BestLap, deltaS2BestLap,
-			deltaS1Best, deltaS2Best;
+	private final int currentLapNum, deltaPosition, bestLapNr, personalBestS1LapNum, personalBestS2LapNum,
+			personalBestS3LapNum, penalties;
+	private final Duration lastLapTime, bestLapTime, deltaLastBestLap, curLapTime, s1, s2, personalBestLapS1Time, personalBestLapS2Time,
+			personalBestLapS3Time, personalBestS1Time, personalBestS2Time, personalBestS3Time, deltaPersonalS1BestLap, deltaPersonalS2BestLap,
+			deltaPersonalS1Best, deltaPersonalS2Best;
 	private final PitStatus pitStatus;
 	private final ResultStatus resultStatus;
 
-	public RacePosition(Lap aLap, Participant aParticipant) {
+	public RacePosition(LapStruct aLap, Participant aParticipant) {
 		curPosition = aLap.getCarPosition();
 		driverName = aParticipant.getDriverName();
 		driverId = aParticipant.getDriverId();
-		s1 = aLap.getSector1TimeMSDuration();
-		s2 = aLap.getSector2TimeMSDuration();
+		s1 = aLap.getSector1Time();
+		s2 = aLap.getSector2Time();
 		currentLapNum = aLap.getCurrentLapNum();
-		deltaPosition = aLap.getGridPosition() - aLap.getCarPosition();
+		deltaPosition = aLap.getDeltaPosition();
 		lastLapTime = aLap.getLastLapTimeDuration();
 		bestLapTime = aLap.getBestLapTimeDuration();
-		deltaLastBestLap = lastLapTime.minus(bestLapTime);
+// TODO Bug: In finished last lap RacePos this should be the delta to curLapTime
+		deltaLastBestLap = aLap.getDeltaLastLapPersonalBestLapTime();
 
 		bestLapNr = aLap.getBestLapNum();
 		curLapTime = aLap.getCurrentLapTimeDuration();
-		bestLapS1Time = aLap.getBestLapSector1TimeInMSDuration();
-		bestLapS2Time = aLap.getBestLapSector2TimeInMSDuration();
-		bestLapS3Time = aLap.getBestLapSector3TimeInMSDuration();
-		bestOverallS1Time = aLap.getBestOverallSector1TimeInMSDuration();
-		bestOverallS1LapNum = aLap.getBestOverallSector1LapNum();
-		bestOverallS2Time = aLap.getBestOverallSector2TimeInMSDuration();
-		bestOverallS2LapNum = aLap.getBestOverallSector2LapNum();
-		bestOverallS3Time = aLap.getBestOverallSector3TimeInMSDuration();
-		bestOverallS3LapNum = aLap.getBestOverallSector3LapNum();
-		deltaS1BestLap = s1.minus(bestLapS1Time);
-		deltaS2BestLap = s2.minus(bestLapS2Time);
-		deltaS1Best = s1.minus(bestOverallS1Time);
-		deltaS2Best = s2.minus(bestOverallS2Time);
+
+		personalBestLapS1Time = aLap.getBestLapSector1Time();
+		personalBestLapS2Time = aLap.getBestLapSector2Time();
+		personalBestLapS3Time = aLap.getBestLapSector3Time();
+		personalBestS1Time = aLap.getBestOverallSector1Time();
+		personalBestS1LapNum = aLap.getBestOverallSector1LapNum();
+		personalBestS2Time = aLap.getBestOverallSector2Time();
+		personalBestS2LapNum = aLap.getBestOverallSector2LapNum();
+		personalBestS3Time = aLap.getBestOverallSector3Time();
+		personalBestS3LapNum = aLap.getBestOverallSector3LapNum();
+		
+		deltaPersonalS1BestLap = aLap.getDeltaPersonalS1BestLap();
+		deltaPersonalS2BestLap = aLap.getDeltaPersonalS2BestLap();
+		deltaPersonalS1Best = aLap.getDeltaPersonalS1Best();
+		deltaPersonalS2Best = aLap.getDeltaPersonalS2Best();
+		
 		pitStatus = aLap.getPitStatus();
 		penalties = aLap.getPenalties();
 		resultStatus = aLap.getResultStatus();
 	}
-
-	public RacePosition(RacePosition aPos, ResultStatus resultStatus) {
-		curPosition = aPos.getCurPosition();
+	
+	public RacePosition(RacePosition aPos, LapStruct aLap, ResultStatus resultStatus) {
 		driverName = aPos.getDriverName();
 		driverId = aPos.getDriverId();
-		s1 = aPos.getSector1TimeInMS();
-		s2 = aPos.getSector2TimeInMS();
+		s1 = aPos.getS1();
+		s2 = aPos.getS2();
 		currentLapNum = aPos.getCurrentLapNum();
-		deltaPosition = aPos.getDeltaPosition();
-		lastLapTime = aPos.getLastLapTime();
-		bestLapTime = aPos.getBestLapTime();
-		deltaLastBestLap = aPos.getDeltaLastBestLap();
-
-		bestLapNr = aPos.getBestLapNr();
 		curLapTime = aPos.getCurLapTime();
-		bestLapS1Time = aPos.getBestLapSector1TimeInMS();
-		bestLapS2Time = aPos.getBestLapSector2TimeInMS();
-		bestLapS3Time = aPos.getBestLapSector3TimeInMS();
-		bestOverallS1Time = aPos.getBestOverallSector1TimeInMS();
-		bestOverallS1LapNum = aPos.getBestOverallS1LapNum();
-		bestOverallS2Time = aPos.getBestOverallSector2TimeInMS();
-		bestOverallS2LapNum = aPos.getBestOverallS2LapNum();
-		bestOverallS3Time = aPos.getBestOverallSector3TimeInMS();
-		bestOverallS3LapNum = aPos.getBestOverallS3LapNum();
-		deltaS1BestLap = aPos.getDeltaS1BestLapS1MS();
-		deltaS2BestLap = aPos.getDeltaS2BestLapS2MS();
-		deltaS1Best = aPos.getDeltaS1BestS1MS();
-		deltaS2Best = aPos.getDeltaS2BestS2MS();
-		pitStatus = aPos.getPitStatus();
-		penalties = aPos.getPenalties();
+
+		curPosition = aLap.getCarPosition();
+		deltaPosition = aLap.getDeltaPosition();
+		lastLapTime = aLap.getLastLapTimeDuration();
+		bestLapTime = aLap.getBestLapTimeDuration();
+		deltaLastBestLap = aLap.getDeltaLastLapPersonalBestLapTime();
+		bestLapNr = aLap.getBestLapNum();
+
+		personalBestLapS1Time = aLap.getBestLapSector1Time();
+		personalBestLapS2Time = aLap.getBestLapSector2Time();
+		personalBestLapS3Time = aLap.getBestLapSector3Time();
+
+		personalBestS1Time = aLap.getBestOverallSector1Time();
+		personalBestS1LapNum = aLap.getBestOverallSector1LapNum();
+		personalBestS2Time = aLap.getBestOverallSector2Time();
+		personalBestS2LapNum = aLap.getBestOverallSector2LapNum();
+		personalBestS3Time = aLap.getBestOverallSector3Time();
+		personalBestS3LapNum = aLap.getBestOverallSector3LapNum();
+
+		deltaPersonalS1BestLap = aLap.getDeltaPersonalS1BestLap(s1);
+		deltaPersonalS2BestLap = aLap.getDeltaPersonalS2BestLap(s2);
+		deltaPersonalS1Best = aLap.getDeltaPersonalS1Best(s1);
+		deltaPersonalS2Best = aLap.getDeltaPersonalS2Best(s2);
+
+		pitStatus = aLap.getPitStatus();
+		penalties = aLap.getPenalties();
+
 		this.resultStatus = resultStatus;
 	}
+
+
+
+
+	public int getPersonalBestS1LapNum() {
+		return personalBestS1LapNum;
+	}
+
+	public int getPersonalBestS2LapNum() {
+		return personalBestS2LapNum;
+	}
+
+	public int getPersonalBestS3LapNum() {
+		return personalBestS3LapNum;
+	}
+
+	public Duration getPersonalBestLapS1Time() {
+		return personalBestLapS1Time;
+	}
+
+	public Duration getPersonalBestLapS2Time() {
+		return personalBestLapS2Time;
+	}
+
+	public Duration getPersonalBestLapS3Time() {
+		return personalBestLapS3Time;
+	}
+
+	public Duration getPersonalBestS1Time() {
+		return personalBestS1Time;
+	}
+
+	public Duration getPersonalBestS2Time() {
+		return personalBestS2Time;
+	}
+
+	public Duration getPersonalBestS3Time() {
+		return personalBestS3Time;
+	}
+
+	public Duration getDeltaPersonalS1BestLap() {
+		return deltaPersonalS1BestLap;
+	}
+
+	public Duration getDeltaPersonalS2BestLap() {
+		return deltaPersonalS2BestLap;
+	}
+
+	public Duration getDeltaPersonalS1Best() {
+		return deltaPersonalS1Best;
+	}
+
+	public Duration getDeltaPersonalS2Best() {
+		return deltaPersonalS2Best;
+	}
+
 
 	public int getCurPosition() {
 		return curPosition;
@@ -93,7 +158,7 @@ public final class RacePosition {
 		return driverName;
 	}
 
-	public Duration getSector1TimeInMS() {
+	public Duration getS1() {
 		return s1;
 	}
 
@@ -103,16 +168,8 @@ public final class RacePosition {
 				d.isNegative() ? 1000 - d.toMillisPart() : d.toMillisPart());
 	}
 
-	public String getSector1() {
-		return formatDurationSecMillis(s1);
-	}
-
-	public Duration getSector2TimeInMS() {
+	public Duration getS2() {
 		return s2;
-	}
-
-	public String getSector2() {
-		return formatDurationSecMillis(s1);
 	}
 
 	public int getCurrentLapNum() {
@@ -125,46 +182,6 @@ public final class RacePosition {
 
 	public int getBestLapNr() {
 		return bestLapNr;
-	}
-
-	public Duration getBestLapSector1TimeInMS() {
-		return bestLapS1Time;
-	}
-
-	public Duration getBestLapSector2TimeInMS() {
-		return bestLapS2Time;
-	}
-
-	public Duration getBestLapSector3TimeInMS() {
-		return bestLapS3Time;
-	}
-
-	public Duration getBestOverallSector1TimeInMS() {
-		return bestOverallS1Time;
-	}
-
-	public Duration getBestOverallSector2TimeInMS() {
-		return bestOverallS2Time;
-	}
-
-	public Duration getBestOverallSector3TimeInMS() {
-		return bestOverallS3Time;
-	}
-
-	public Duration getDeltaS1BestLapS1MS() {
-		return deltaS1BestLap;
-	}
-
-	public Duration getDeltaS2BestLapS2MS() {
-		return deltaS2BestLap;
-	}
-
-	public Duration getDeltaS1BestS1MS() {
-		return deltaS1Best;
-	}
-
-	public Duration getDeltaS2BestS2MS() {
-		return deltaS2Best;
 	}
 
 	public int getPenalties() {
@@ -190,19 +207,7 @@ public final class RacePosition {
 	public Duration getDeltaLastBestLap() {
 		return deltaLastBestLap;
 	}
-
-	public int getBestOverallS1LapNum() {
-		return bestOverallS1LapNum;
-	}
-
-	public int getBestOverallS2LapNum() {
-		return bestOverallS2LapNum;
-	}
-
-	public int getBestOverallS3LapNum() {
-		return bestOverallS3LapNum;
-	}
-
+	
 	public String getPenaltiesDescription() {
 		return getPenalties() == 0 ? " - " : getPenalties() + " secs";
 	}
@@ -220,28 +225,28 @@ public final class RacePosition {
 	}
 
 	public String getS1Description() {
-		return formatOptionalSectorTime(getSector1TimeInMS()) + " / "
-				+ formatDurationSecMillis(getBestLapSector1TimeInMS()) + " / "
-				+ formatLapNumber(getBestOverallS1LapNum()) + formatDurationSecMillis(getBestOverallSector1TimeInMS())
-				+ " (" + formatOptionalDeltaMillis(getSector1TimeInMS(), getDeltaS1BestLapS1MS()) + ") ";
+		return formatOptionalSectorTime(getS1()) + " / "
+				+ formatDurationSecMillis(getPersonalBestLapS1Time()) + " / "
+				+ formatLapNumber(getPersonalBestS1LapNum()) + formatDurationSecMillis(getPersonalBestS1Time())
+				+ " (" + formatOptionalDeltaMillis(getS1(), getDeltaPersonalS1Best()) + ") ";
 	}
 
 	public String getS2Description() {
-		return formatOptionalSectorTime(getSector2TimeInMS()) + " / "
-				+ formatDurationSecMillis(getBestLapSector2TimeInMS()) + " / "
-				+ formatLapNumber(getBestOverallS2LapNum()) + formatDurationSecMillis(getBestOverallSector2TimeInMS())
-				+ " (" + formatOptionalDeltaMillis(getSector2TimeInMS(), getDeltaS2BestLapS2MS()) + ") ";
+		return formatOptionalSectorTime(getS2()) + " / "
+				+ formatDurationSecMillis(getPersonalBestLapS2Time()) + " / "
+				+ formatLapNumber(getPersonalBestS2LapNum()) + formatDurationSecMillis(getPersonalBestS2Time())
+				+ " (" + formatOptionalDeltaMillis(getS2(), getDeltaPersonalS2Best()) + ") ";
 	}
 
 	public String getS3Description() {
-		return formatDurationSecMillis(getBestLapSector3TimeInMS()) + " / " + formatLapNumber(getBestOverallS3LapNum())
-				+ formatDurationSecMillis(getBestOverallSector3TimeInMS());
+		return formatDurationSecMillis(getPersonalBestLapS3Time()) + " / " + formatLapNumber(getPersonalBestS3LapNum())
+				+ formatDurationSecMillis(getPersonalBestS3Time());
 	}
 
 	public String getLapDescription() {
-		String res = getBestLapNr() == 0 ? " - "
+		String res = String.format("L%d / ",getCurrentLapNum())+(getBestLapNr() == 0 ? " - "
 				: durationToMinSecMillis(
-						getResultStatus() == ResultStatus.finished ? getLastLapTime() : getCurLapTime()) + " / "
+						getLastLapTime())) + " / "
 						+ formatLapNumber(getBestLapNr()) + durationToMinSecMillis(getBestLapTime()) + " ("
 						+ formatDurationSecMillis(getDeltaLastBestLap()) + ") ";
 
@@ -280,25 +285,25 @@ public final class RacePosition {
 		final int prime = 31;
 		int result = 1;
 		result = prime * result + bestLapNr;
-		result = prime * result + ((bestLapS1Time == null) ? 0 : bestLapS1Time.hashCode());
-		result = prime * result + ((bestLapS2Time == null) ? 0 : bestLapS2Time.hashCode());
-		result = prime * result + ((bestLapS3Time == null) ? 0 : bestLapS3Time.hashCode());
+		result = prime * result + ((personalBestLapS1Time == null) ? 0 : personalBestLapS1Time.hashCode());
+		result = prime * result + ((personalBestLapS2Time == null) ? 0 : personalBestLapS2Time.hashCode());
+		result = prime * result + ((personalBestLapS3Time == null) ? 0 : personalBestLapS3Time.hashCode());
 		result = prime * result + ((bestLapTime == null) ? 0 : bestLapTime.hashCode());
-		result = prime * result + bestOverallS1LapNum;
-		result = prime * result + ((bestOverallS1Time == null) ? 0 : bestOverallS1Time.hashCode());
-		result = prime * result + bestOverallS2LapNum;
-		result = prime * result + ((bestOverallS2Time == null) ? 0 : bestOverallS2Time.hashCode());
-		result = prime * result + bestOverallS3LapNum;
-		result = prime * result + ((bestOverallS3Time == null) ? 0 : bestOverallS3Time.hashCode());
+		result = prime * result + personalBestS1LapNum;
+		result = prime * result + ((personalBestS1Time == null) ? 0 : personalBestS1Time.hashCode());
+		result = prime * result + personalBestS2LapNum;
+		result = prime * result + ((personalBestS2Time == null) ? 0 : personalBestS2Time.hashCode());
+		result = prime * result + personalBestS3LapNum;
+		result = prime * result + ((personalBestS3Time == null) ? 0 : personalBestS3Time.hashCode());
 		result = prime * result + ((curLapTime == null) ? 0 : curLapTime.hashCode());
 		result = prime * result + curPosition;
 		result = prime * result + currentLapNum;
 		result = prime * result + ((deltaLastBestLap == null) ? 0 : deltaLastBestLap.hashCode());
 		result = prime * result + deltaPosition;
-		result = prime * result + ((deltaS1Best == null) ? 0 : deltaS1Best.hashCode());
-		result = prime * result + ((deltaS1BestLap == null) ? 0 : deltaS1BestLap.hashCode());
-		result = prime * result + ((deltaS2Best == null) ? 0 : deltaS2Best.hashCode());
-		result = prime * result + ((deltaS2BestLap == null) ? 0 : deltaS2BestLap.hashCode());
+		result = prime * result + ((deltaPersonalS1Best == null) ? 0 : deltaPersonalS1Best.hashCode());
+		result = prime * result + ((deltaPersonalS1BestLap == null) ? 0 : deltaPersonalS1BestLap.hashCode());
+		result = prime * result + ((deltaPersonalS2Best == null) ? 0 : deltaPersonalS2Best.hashCode());
+		result = prime * result + ((deltaPersonalS2BestLap == null) ? 0 : deltaPersonalS2BestLap.hashCode());
 		result = prime * result + ((driverId == null) ? 0 : driverId.hashCode());
 		result = prime * result + ((driverName == null) ? 0 : driverName.hashCode());
 		result = prime * result + ((lastLapTime == null) ? 0 : lastLapTime.hashCode());
@@ -321,46 +326,46 @@ public final class RacePosition {
 		RacePosition other = (RacePosition) obj;
 		if (bestLapNr != other.bestLapNr)
 			return false;
-		if (bestLapS1Time == null) {
-			if (other.bestLapS1Time != null)
+		if (personalBestLapS1Time == null) {
+			if (other.personalBestLapS1Time != null)
 				return false;
-		} else if (!bestLapS1Time.equals(other.bestLapS1Time))
+		} else if (!personalBestLapS1Time.equals(other.personalBestLapS1Time))
 			return false;
-		if (bestLapS2Time == null) {
-			if (other.bestLapS2Time != null)
+		if (personalBestLapS2Time == null) {
+			if (other.personalBestLapS2Time != null)
 				return false;
-		} else if (!bestLapS2Time.equals(other.bestLapS2Time))
+		} else if (!personalBestLapS2Time.equals(other.personalBestLapS2Time))
 			return false;
-		if (bestLapS3Time == null) {
-			if (other.bestLapS3Time != null)
+		if (personalBestLapS3Time == null) {
+			if (other.personalBestLapS3Time != null)
 				return false;
-		} else if (!bestLapS3Time.equals(other.bestLapS3Time))
+		} else if (!personalBestLapS3Time.equals(other.personalBestLapS3Time))
 			return false;
 		if (bestLapTime == null) {
 			if (other.bestLapTime != null)
 				return false;
 		} else if (!bestLapTime.equals(other.bestLapTime))
 			return false;
-		if (bestOverallS1LapNum != other.bestOverallS1LapNum)
+		if (personalBestS1LapNum != other.personalBestS1LapNum)
 			return false;
-		if (bestOverallS1Time == null) {
-			if (other.bestOverallS1Time != null)
+		if (personalBestS1Time == null) {
+			if (other.personalBestS1Time != null)
 				return false;
-		} else if (!bestOverallS1Time.equals(other.bestOverallS1Time))
+		} else if (!personalBestS1Time.equals(other.personalBestS1Time))
 			return false;
-		if (bestOverallS2LapNum != other.bestOverallS2LapNum)
+		if (personalBestS2LapNum != other.personalBestS2LapNum)
 			return false;
-		if (bestOverallS2Time == null) {
-			if (other.bestOverallS2Time != null)
+		if (personalBestS2Time == null) {
+			if (other.personalBestS2Time != null)
 				return false;
-		} else if (!bestOverallS2Time.equals(other.bestOverallS2Time))
+		} else if (!personalBestS2Time.equals(other.personalBestS2Time))
 			return false;
-		if (bestOverallS3LapNum != other.bestOverallS3LapNum)
+		if (personalBestS3LapNum != other.personalBestS3LapNum)
 			return false;
-		if (bestOverallS3Time == null) {
-			if (other.bestOverallS3Time != null)
+		if (personalBestS3Time == null) {
+			if (other.personalBestS3Time != null)
 				return false;
-		} else if (!bestOverallS3Time.equals(other.bestOverallS3Time))
+		} else if (!personalBestS3Time.equals(other.personalBestS3Time))
 			return false;
 		if (curLapTime == null) {
 			if (other.curLapTime != null)
@@ -378,25 +383,25 @@ public final class RacePosition {
 			return false;
 		if (deltaPosition != other.deltaPosition)
 			return false;
-		if (deltaS1Best == null) {
-			if (other.deltaS1Best != null)
+		if (deltaPersonalS1Best == null) {
+			if (other.deltaPersonalS1Best != null)
 				return false;
-		} else if (!deltaS1Best.equals(other.deltaS1Best))
+		} else if (!deltaPersonalS1Best.equals(other.deltaPersonalS1Best))
 			return false;
-		if (deltaS1BestLap == null) {
-			if (other.deltaS1BestLap != null)
+		if (deltaPersonalS1BestLap == null) {
+			if (other.deltaPersonalS1BestLap != null)
 				return false;
-		} else if (!deltaS1BestLap.equals(other.deltaS1BestLap))
+		} else if (!deltaPersonalS1BestLap.equals(other.deltaPersonalS1BestLap))
 			return false;
-		if (deltaS2Best == null) {
-			if (other.deltaS2Best != null)
+		if (deltaPersonalS2Best == null) {
+			if (other.deltaPersonalS2Best != null)
 				return false;
-		} else if (!deltaS2Best.equals(other.deltaS2Best))
+		} else if (!deltaPersonalS2Best.equals(other.deltaPersonalS2Best))
 			return false;
-		if (deltaS2BestLap == null) {
-			if (other.deltaS2BestLap != null)
+		if (deltaPersonalS2BestLap == null) {
+			if (other.deltaPersonalS2BestLap != null)
 				return false;
-		} else if (!deltaS2BestLap.equals(other.deltaS2BestLap))
+		} else if (!deltaPersonalS2BestLap.equals(other.deltaPersonalS2BestLap))
 			return false;
 		if (driverId != other.driverId)
 			return false;
@@ -433,19 +438,19 @@ public final class RacePosition {
 	public String toString() {
 		return "RacePosition [curPosition=" + curPosition + ", driverName=" + driverName + ", driverId=" + driverId
 				+ ", currentLapNum=" + currentLapNum + ", deltaPosition=" + deltaPosition + ", bestLapNr=" + bestLapNr
-				+ ", bestOverallS1LapNum=" + bestOverallS1LapNum + ", bestOverallS2LapNum=" + bestOverallS2LapNum
-				+ ", bestOverallS3LapNum=" + bestOverallS3LapNum + ", penalties=" + penalties + ", lastLapTime="
+				+ ", bestOverallS1LapNum=" + personalBestS1LapNum + ", bestOverallS2LapNum=" + personalBestS2LapNum
+				+ ", bestOverallS3LapNum=" + personalBestS3LapNum + ", penalties=" + penalties + ", lastLapTime="
 				+ lastLapTime + ", bestLapTime=" + bestLapTime + ", deltaLastBestLap=" + deltaLastBestLap
-				+ ", curLapTime=" + curLapTime + ", s1=" + s1 + ", s2=" + s2 + ", bestLapS1Time=" + bestLapS1Time
-				+ ", bestLapS2Time=" + bestLapS2Time + ", bestLapS3Time=" + bestLapS3Time + ", bestOverallS1Time="
-				+ bestOverallS1Time + ", bestOverallS2Time=" + bestOverallS2Time + ", bestOverallS3Time="
-				+ bestOverallS3Time + ", deltaS1BestLap=" + deltaS1BestLap + ", deltaS2BestLap=" + deltaS2BestLap
-				+ ", deltaS1Best=" + deltaS1Best + ", deltaS2Best=" + deltaS2Best + ", pitStatus=" + pitStatus
+				+ ", curLapTime=" + curLapTime + ", s1=" + s1 + ", s2=" + s2 + ", bestLapS1Time=" + personalBestLapS1Time
+				+ ", bestLapS2Time=" + personalBestLapS2Time + ", bestLapS3Time=" + personalBestLapS3Time + ", bestOverallS1Time="
+				+ personalBestS1Time + ", bestOverallS2Time=" + personalBestS2Time + ", bestOverallS3Time="
+				+ personalBestS3Time + ", deltaS1BestLap=" + deltaPersonalS1BestLap + ", deltaS2BestLap=" + deltaPersonalS2BestLap
+				+ ", deltaS1Best=" + deltaPersonalS1Best + ", deltaS2Best=" + deltaPersonalS2Best + ", pitStatus=" + pitStatus
 				+ ", resultStatus=" + resultStatus + "]";
 	}
 
-	public RacePosition finishRace() {
-		return new RacePosition(this, ResultStatus.finished);
+	public RacePosition finishRace(LapStruct aLap) {
+		return new RacePosition(this, aLap,ResultStatus.finished);
 	}
 
 }

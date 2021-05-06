@@ -1,8 +1,43 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import javafx.scene.canvas.Canvas?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
 <?import javafx.scene.layout.Pane?>
+<?import javafx.scene.layout.StackPane?>
 
-
-<Pane fx:id="paneTrackPosition" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="902.0" prefWidth="1350.0" xmlns="http://javafx.com/javafx/15.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="raceTrackerGUI.TrackPositionController" style="-fx-background-color: white;">
-
+<Pane fx:id="paneTrackPosition" maxHeight="-Infinity"
+	maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity"
+	prefHeight="900.0" prefWidth="1500.0"
+	style="-fx-background-color: white;"
+	xmlns="http://javafx.com/javafx/15.0.1"
+	xmlns:fx="http://javafx.com/fxml/1"
+	fx:controller="raceTrackerGUI.TrackPositionController">
+	<children>
+		<HBox prefHeight="900.0" prefWidth="1500.0">
+			<children>
+				<StackPane prefHeight="900.0" prefWidth="1200.0">
+					<children>
+						<ImageView fx:id="imageViewTrackPosition"
+							pickOnBounds="true" preserveRatio="true">
+						</ImageView>
+						<Canvas height="900.0" width="1200.0" />
+					</children>
+				</StackPane>
+				<TableView fx:id="tableTrackPosLegend" prefHeight="900.0"
+					prefWidth="300.0">
+					<columns>
+						<TableColumn fx:id="tableTrackPosColColor"
+							prefWidth="50.0" text="Pos" />
+						<TableColumn fx:id="tableTrackPosColDriver"
+							prefWidth="150.0" text="Driver" />
+						<TableColumn fx:id="tableTrackPosColDelta"
+							prefWidth="100.0" text="Delta" />
+					</columns>
+				</TableView>
+			</children>
+		</HBox>
+	</children>
 </Pane>

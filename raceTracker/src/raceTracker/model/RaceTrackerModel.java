@@ -6,13 +6,14 @@ import java.util.List;
 
 import raceTracker.model.enums.CarController;
 import raceTracker.model.gameStructs.CarTelemetryData;
-import raceTracker.model.gameStructs.Lap;
+import raceTracker.model.gameStructs.LapStruct;
 import raceTracker.model.gameStructs.MotionData;
 import raceTracker.model.gameStructs.PacketCarTelemetryData;
 import raceTracker.model.gameStructs.PacketMotionData;
 import raceTracker.model.gameStructs.PacketParticipants;
 import raceTracker.model.gameStructs.Participant;
-import raceTracker.model.gameStructs.Session;
+import raceTracker.model.gameStructs.SessionStruct;
+import raceTracker.model.viewModel.DeltaTracker;
 import raceTracker.model.viewModel.DriverLapHistory;
 import raceTracker.model.viewModel.RaceStandings;
 import raceTracker.model.viewModel.TrackPosition;
@@ -30,14 +31,15 @@ public class RaceTrackerModel {
 	private final TrackPositionListener trackPositionListener;
 	
 
-	private Session curSession;
-	private RaceStandings curStandings;
-	private DriverLapHistory driverLapHistory;
+	private SessionStruct curSession;
+	private RaceStandings curStandings=new RaceStandings();
+	private DriverLapHistory driverLapHistory=new DriverLapHistory();
+	private DeltaTracker deltas=new DeltaTracker();
 	
-	private List<Participant> curParticipants;
-	private List<TrackPosition> curTrackPositions;
+	private List<Participant> curParticipants=new ArrayList<>();
+	private List<TrackPosition> curTrackPositions=new ArrayList<>();
 	
-	private float maxPosX=-99999,minPosX=99999,maxPosY=-99999,minPosY=99999;
+	private float maxPosX=-99999,minPosX=99999,maxPosY=-99999,minPosY=99999,maxPosZ=-99999,minPosZ=99999;
 	
 	
 	public RaceTrackerModel(UpshiftBeepListener beepListener, GearSuggestionListener gearSuggestionListener,SessionListener sessionListener,RaceStandingsListener raceStandingsListener, TrackPositionListener trackPositionListener) {
@@ -46,28 +48,29 @@ public class RaceTrackerModel {
 		this.sessionListener=sessionListener;
 		this.raceStandingsListener=raceStandingsListener;
 		this.trackPositionListener=trackPositionListener;
-		this.driverLapHistory=new DriverLapHistory();
 	}
 	
-	public void receiceSessionData(Session newSessionData) {
+	public void receiceSessionData(SessionStruct newSessionData) {
+//		System.out.println(DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now())+" - RaceTrackerModel.receiceSessionData");
 		if (curSession ==null || !curSession.equals(newSessionData)) {
 			curSession=newSessionData;
 			sessionListener.updateSessionData(newSessionData);
 		}
 	}
 	
-	public void receiceLapData(List<Lap> laps) {
+	public void receiceLapData(List<LapStruct> laps) {
+//		System.out.println(DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now())+" - RaceTrackerModel.receiceLapData");		
 		RaceStandings newStandings=new RaceStandings(laps, curParticipants,curStandings);
 		if (curStandings==null || !curStandings.equals(newStandings)) {
 			curStandings=newStandings;
-			driverLapHistory.addLaps(curStandings.getPos());
-			raceStandingsListener.updateRaceStandings(newStandings,driverLapHistory);
 		}
-		
-
+		driverLapHistory.addLaps(laps,curParticipants);
+		deltas.trackProgress(laps, curParticipants, curSession.getSessionDuration());
+		raceStandingsListener.updateRaceStandings(newStandings,driverLapHistory);
 	}
 	
 	public void receiveTelemetryUpdate(PacketCarTelemetryData telemetryData) {
+//		System.out.println(DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now())+" - RaceTrackerModel.receiveTelemetryData");		
 		CarTelemetryData playerTelemetry = telemetryData.getTelemetries().get(idxPlayerCar);
 		int curRPM = playerTelemetry.getEngineRPM();
 		if (prevRPM < UPSHIFT_BEEP_RPM_THRESHOLD && curRPM >= UPSHIFT_BEEP_RPM_THRESHOLD && playerTelemetry.getThrottle()>0.6) {
@@ -86,6 +89,7 @@ public class RaceTrackerModel {
 	}
 	
 	public void receiveParticipants(PacketParticipants participants) {
+//		System.out.println(DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now())+" - RaceTrackerModel.receiveParticipantData");		
 		numActiveCars=participants.getNumActiveCars();
 		curParticipants=participants.getParticipants();
 
@@ -105,16 +109,20 @@ public class RaceTrackerModel {
 	}
 	
 	public void receiveTrackPositions(PacketMotionData positionsStruct) {
+//		System.out.println(DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now())+" - RaceTrackerModel.receiveTrackData");		
 		List<TrackPosition> newPositions=new ArrayList<>();
 		
 		for (int i=0; i< positionsStruct.getMotions().size();i++) {
 			MotionData curMotion=positionsStruct.getMotions().get(i);
-			TrackPosition newPos=new TrackPosition(curParticipants.get(i).getDriverId(), curMotion.getWorldPositionX(), curMotion.getWorldPositionY());
+			TrackPosition newPos=new TrackPosition(i,curStandings.getPositionForDriver(curParticipants.get(i).getDriverId()).getCurPosition(),curParticipants.get(i).getDriverId(), curMotion.getWorldPositionX(), curMotion.getWorldPositionY(), curMotion.getWorldPositionZ());
 			maxPosX=Math.max(maxPosX, newPos.getPosX());
 			minPosX=Math.min(minPosX, newPos.getPosX());
 			maxPosY=Math.max(maxPosY, newPos.getPosY());
 			minPosY=Math.min(minPosY, newPos.getPosY());
-			System.out.println("maxPosX: "+ maxPosX+", minPosX: "+minPosX+", maxPosY: "+maxPosY+", minPosY: "+minPosY);
+			maxPosZ=Math.max(maxPosZ, newPos.getPosZ());
+			minPosZ=Math.min(minPosZ, newPos.getPosZ());
+
+//			System.out.println("maxPosX: "+ maxPosX+", minPosX: "+minPosX+", maxPosY: "+maxPosY+", minPosY: "+minPosY+", maxPosZ: "+maxPosZ+", minPosZ: "+minPosZ);
 			
 			newPositions.add(newPos);
 		}

@@ -10,6 +10,7 @@ import java.util.NoSuchElementException;
 import raceTracker.model.enums.Driver;
 import raceTracker.model.enums.ResultStatus;
 import raceTracker.model.enums.Sector;
+import raceTracker.model.gameStructs.LapStruct;
 
 public class LapHistory {
 
@@ -26,20 +27,21 @@ public class LapHistory {
 		driver = aDriver;
 	}
 
-	public void addLap(RacePosition pos) {
-		int currentLapNum = pos.getCurrentLapNum();
-		if (!laps.containsKey(currentLapNum) && laps.containsKey(currentLapNum - 1)) {
-			Lap finalizedLap = laps.get(currentLapNum - 1).finalizeLap(pos);
-			if (pos.getResultStatus() != ResultStatus.finished) {
-				laps.put(currentLapNum - 1, finalizedLap);
-			}
+	public void addLap(LapStruct lap, LapRecord bestLap, SectorRecord bestS1, SectorRecord bestS2, SectorRecord bestS3) {
+//TODO: Bug when CurrentLap>Session totalLapNum ==> i.e. 6 of 5 laps
+//TODO get rid of unnecessary updatePersonalRecords - move to construction of new Lap in finalizeLaps
+		int currentLapNum = lap.getCurrentLapNum();
+		if (laps.containsKey(currentLapNum - 1) && !laps.get(currentLapNum - 1).isFinished()) {
+			Lap finalizedLap = laps.get(currentLapNum - 1).finalizeLap(lap,bestLap,bestS1,bestS2,bestS3,personalBestS3);
+
+			laps.put(currentLapNum - 1, finalizedLap);
 			updatePersonalRecords(finalizedLap);
+		} 
+		if (lap.getResultStatus() != ResultStatus.finished) {
+			Lap newLap = Lap.unfinishedLap(lap,bestLap,bestS1,bestS2,bestS3);
+			laps.put(currentLapNum, newLap);
+			updatePersonalRecords(newLap);
 		}
-
-		Lap newLap = new Lap(pos);
-		laps.put(currentLapNum, newLap);
-
-		updatePersonalRecords(newLap);
 	}
 
 	public List<Lap> getLaps() {
@@ -53,7 +55,7 @@ public class LapHistory {
 	}
 
 	void updatePersonalRecords(Lap aLap) {
-		personalBestLap = personalBestLap.update(aLap);
+		personalBestLap = personalBestLap.update(aLap, driver);
 		personalBestS1 = personalBestS1.update(aLap.getS1(), driver, aLap.getLapNum());
 		personalBestS2 = personalBestS2.update(aLap.getS2(), driver, aLap.getLapNum());
 		personalBestS3 = personalBestS3.update(aLap.getS3(), driver, aLap.getLapNum());

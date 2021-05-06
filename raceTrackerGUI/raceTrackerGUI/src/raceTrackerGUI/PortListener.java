@@ -5,16 +5,19 @@ import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.SocketException;
 import java.nio.ByteBuffer;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+import raceTracker.RaceTrackerConsoleRunner;
 import raceTracker.model.RaceTrackerModel;
 import raceTracker.model.gameStructs.Header;
-import raceTracker.model.gameStructs.Lap;
+import raceTracker.model.gameStructs.LapStruct;
 import raceTracker.model.gameStructs.PacketCarTelemetryData;
 import raceTracker.model.gameStructs.PacketMotionData;
 import raceTracker.model.gameStructs.PacketParticipants;
-import raceTracker.model.gameStructs.Session;
+import raceTracker.model.gameStructs.SessionStruct;
 
 public class PortListener implements Runnable {
 
@@ -60,8 +63,8 @@ public class PortListener implements Runnable {
 				int port = packet.getPort();
 				byte[] data = packet.getData();
 				packet = new DatagramPacket(buf, buf.length, address, port);
-				// String received = new String(packet.getData(), 0, packet.getLength());
-
+//				System.out.println(RaceTrackerConsoleRunner.bytesToHex(packet.getData())+" "+packet.getLength());
+//				System.out.println(DateTimeFormatter.ISO_DATE_TIME.format(LocalDateTime.now())+" Packet received");
 				ByteBuffer bb = ByteBuffer.wrap(data);
 				byte[] headerData = new byte[24];
 				bb.get(headerData, 0, headerData.length);
@@ -75,21 +78,22 @@ public class PortListener implements Runnable {
 					PacketMotionData motions = new PacketMotionData(model.getNumActiveCars(), motionData);
 					model.receiveTrackPositions(motions);
 //					System.out.println(bytesToHex(headerData) + " | " + bytesToHex(motionData));
+					break;
 				case session:
 					byte[] sessionData = new byte[251];
 					bb.get(sessionData, 0, sessionData.length);
-					// System.out.println(bytesToHex(headerData) + " | " + bytesToHex(sessionData));
-					Session session = new Session(sessionData);
+//					System.out.println(RaceTrackerConsoleRunner.bytesToHex(headerData) + " | " + RaceTrackerConsoleRunner.bytesToHex(sessionData));
+					SessionStruct session = new SessionStruct(sessionData);
 //					System.out.println(header + " -> " + session);
 					model.receiceSessionData(session);
 					break;
 				case lapData:
-					byte[] lapsData = new byte[Lap.LAP_DATA_TOTAL_SIZE];
+					byte[] lapsData = new byte[LapStruct.LAP_DATA_TOTAL_SIZE];
 					// System.out.println(bb.remaining());
 					// System.out.println(bytesToHex(data));
 					bb.get(lapsData, 0, lapsData.length);
 					// System.out.println(bytesToHex(headerData) + " | " + bytesToHex(lapsData));
-					List<Lap> laps = Lap.getLaps(model.getNumActiveCars(), lapsData);
+					List<LapStruct> laps = LapStruct.getLaps(model.getNumActiveCars(), lapsData);
 					model.receiceLapData(laps);
 					// System.out.println(header + " -> " + laps);
 					break;
@@ -101,7 +105,7 @@ public class PortListener implements Runnable {
 					// System.out.println(RaceTrackerConsoleRunner.bytesToHex(headerData) + " | " +
 					// RaceTrackerConsoleRunner.bytesToHex(participantsData));
 					PacketParticipants participants = new PacketParticipants(participantsData);
-					System.out.println(header + " -> " + participants);
+//					System.out.println(header + " -> " + participants);
 					model.receiveParticipants(participants);
 					break;
 				case carTelemetry:

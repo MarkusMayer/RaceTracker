@@ -19,6 +19,9 @@ public class MainController {
 	private ViewModel vModel;
 
 	@FXML
+	public Label lblBestLap;
+	
+	@FXML
 	private Label lblTrackName;
 
 	@FXML
@@ -80,8 +83,10 @@ public class MainController {
 		this.lhc=lhc;
 		this.tpc=tpc;
 		
-		vModel.trackNameProperty().addListener(
-				(observable, oldValue, newValue) -> Platform.runLater(() -> lblTrackName.setText(newValue)));
+		vModel.trackProperty().addListener(
+				(observable, oldValue, newValue) -> Platform.runLater(() -> lblTrackName.setText(newValue.getTrackName())));
+		vModel.lapHistoryLapRecordProperty().addListener(
+				(observable, oldValue, newValue) -> Platform.runLater(() -> lblBestLap.setText(newValue.getLapRecordDescription())));
 		vModel.suggestedGearProperty().addListener((observable, oldValue, newValue) -> Platform
 				.runLater(() -> lblSuggestedGear.setText(newValue.toString())));
 		vModel.lapDescriptionProperty().addListener((observable, oldValue, newValue) -> Platform
@@ -120,14 +125,6 @@ public class MainController {
 		vModel.setDriverForLapHistory(driverId);
 		paneMain.getChildren().clear();
 		paneMain.getChildren().add(lhc.paneLapHistory);
-		
-//		Label l = new Label();
-//		l.setOnMouseClicked(event2 -> {
-//			paneMain.getChildren().clear();
-//			paneMain.getChildren().add(tblCurStandings);
-//		});
-//		l.setText("asdsffsdf");
-//		paneMain.getChildren().add(l);
 	}
 	
 	public void showStandings(Event e) {

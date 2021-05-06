@@ -1,0 +1,3 @@
+resources are loaded from (eclipse project output dir:
+
+..\modules\RaceTrackerGUI

@@ -30,12 +30,12 @@ import raceTracker.model.TrackPositionListener;
 import raceTracker.model.UpshiftBeepListener;
 import raceTracker.model.enums.Flag;
 import raceTracker.model.gameStructs.Header;
-import raceTracker.model.gameStructs.Lap;
+import raceTracker.model.gameStructs.LapStruct;
 import raceTracker.model.gameStructs.MarshallZone;
 import raceTracker.model.gameStructs.PacketCarTelemetryData;
 import raceTracker.model.gameStructs.PacketMotionData;
 import raceTracker.model.gameStructs.PacketParticipants;
-import raceTracker.model.gameStructs.Session;
+import raceTracker.model.gameStructs.SessionStruct;
 import raceTracker.model.viewModel.DriverLapHistory;
 import raceTracker.model.viewModel.RacePosition;
 import raceTracker.model.viewModel.RaceStandings;
@@ -105,7 +105,7 @@ public class RaceTrackerConsoleRunner implements UpshiftBeepListener, GearSugges
 				int port = packet.getPort();
 				byte[] data = packet.getData();
 				packet = new DatagramPacket(buf, buf.length, address, port);
-				// String received = new String(packet.getData(), 0, packet.getLength());
+//				System.out.println(bytesToHex(packet.getData()));
 
 				ByteBuffer bb = ByteBuffer.wrap(data);
 				byte[] headerData = new byte[24];
@@ -117,24 +117,25 @@ public class RaceTrackerConsoleRunner implements UpshiftBeepListener, GearSugges
 				case motion:
 					byte[] motionData = new byte[1464];
 					bb.get(motionData, 0, motionData.length);
-					System.out.println(bytesToHex(headerData) + " | " + bytesToHex(motionData));
+//					System.out.println("raw Struct MotionData: "+bytesToHex(headerData) + " | " + bytesToHex(motionData));
 					PacketMotionData motions=new PacketMotionData(model.getNumActiveCars(), motionData);
 					model.receiveTrackPositions(motions);
+					break;
 				case session:
 					byte[] sessionData = new byte[251];
 					bb.get(sessionData, 0, sessionData.length);
 //					System.out.println(bytesToHex(headerData) + " | " + bytesToHex(sessionData));
-					Session session = new Session(sessionData);
+					SessionStruct session = new SessionStruct(sessionData);
 //					System.out.println(header + " -> " + session);
 					model.receiceSessionData(session);
 					break;
 				case lapData:
-					byte[] lapsData = new byte[Lap.LAP_DATA_TOTAL_SIZE];
+					byte[] lapsData = new byte[LapStruct.LAP_DATA_TOTAL_SIZE];
 //					System.out.println(bb.remaining());
 //					System.out.println(bytesToHex(data));
 					bb.get(lapsData, 0, lapsData.length);
 //					System.out.println(bytesToHex(headerData) + " | " + bytesToHex(lapsData));
-					List<Lap> laps = Lap.getLaps(model.getNumActiveCars(), lapsData);
+					List<LapStruct> laps = LapStruct.getLaps(model.getNumActiveCars(), lapsData);
 					model.receiceLapData(laps);
 //					System.out.println(header + " -> " + laps);
 					break;
@@ -143,9 +144,9 @@ public class RaceTrackerConsoleRunner implements UpshiftBeepListener, GearSugges
 
 					bb.get(participantsData, 0, participantsData.length);
 
-					System.out.println(bytesToHex(headerData) + " | " + bytesToHex(participantsData));
+//					System.out.println(bytesToHex(headerData) + " | " + bytesToHex(participantsData));
 					PacketParticipants participants = new PacketParticipants(participantsData);
-					System.out.println(header + " -> " + participants);
+//					System.out.println(header + " -> " + participants);
 					model.receiveParticipants(participants);
 					break;
 				case carTelemetry:
@@ -241,7 +242,7 @@ public class RaceTrackerConsoleRunner implements UpshiftBeepListener, GearSugges
 	}
 
 	@Override
-	public void updateSessionData(Session newSessionData) {
+	public void updateSessionData(SessionStruct newSessionData) {
 		System.out.println("Session Time: "+newSessionData.getSessionDuration()+", time left: "+newSessionData.getSessionTimeLeft());
 		List<MarshallZone> activeZones=newSessionData.getZones().stream().filter(aZone -> (aZone.getZone()!=Flag.none )).collect(Collectors.toList());
 		if (!activeZones.isEmpty()) {
@@ -259,7 +260,7 @@ public class RaceTrackerConsoleRunner implements UpshiftBeepListener, GearSugges
 	@Override
 	public void updateTrackPosition(List<TrackPosition> positions) {
 		for (TrackPosition trackPosition : positions) {
-			System.out.println(trackPosition);
+//			System.out.println(trackPosition);
 		}
 	}
 

@@ -44,7 +44,7 @@ public class LapRecord implements Comparable<LapRecord>{
 		return isSet;
 	}
 
-	public LapRecord update(Lap aLap) {
+	public LapRecord update(Lap aLap, Driver driver) {
 		Objects.requireNonNull(aLap);
 		if (!aLap.isFinished())
 			return this;
@@ -87,6 +87,10 @@ public class LapRecord implements Comparable<LapRecord>{
 			return false;
 		return true;
 	}
+	
+	public String getLapRecordDescription() {
+		return String.format("L%d - %s - %s", lapNum,driver.getShortName(),RacePosition.durationToMinSecMillis(lapTime));
+	}
 
 	@Override
 	public String toString() {
@@ -100,6 +104,10 @@ public class LapRecord implements Comparable<LapRecord>{
 	@Override
 	public int compareTo(LapRecord o) {
 		return getLapTime().compareTo(o.getLapTime());
+	}
+	
+	public Duration getDelta(Duration compLapTime) {
+		return isSet() ? compLapTime.minus(getLapTime()): Duration.ZERO;
 	}
 
 }

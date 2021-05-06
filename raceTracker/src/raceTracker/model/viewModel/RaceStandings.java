@@ -6,22 +6,40 @@ import java.util.List;
 import java.util.Objects;
 
 import raceTracker.model.enums.Driver;
-import raceTracker.model.gameStructs.Lap;
+import raceTracker.model.enums.ResultStatus;
+import raceTracker.model.gameStructs.LapStruct;
 import raceTracker.model.gameStructs.Participant;
 
 public final class RaceStandings {
-	private final List<RacePosition> pos=new ArrayList<>();
+	private final List<RacePosition> pos = new ArrayList<>();
+
+//TODO: Add times and delta times for session overall best lap / s1 / s2 / s3
 	
-	public RaceStandings(List<Lap> lapData, List<Participant> participants, RaceStandings curStandings) {
-		if (lapData.size()==participants.size()) {
-			for (int i=0; i<lapData.size();i++) {
-				pos.add(new RacePosition(lapData.get(i),participants.get(i)));
+	public RaceStandings() {
+	}
+
+	public RaceStandings(List<LapStruct> lapData, List<Participant> participants, RaceStandings curStandings) {
+		Objects.requireNonNull(curStandings);
+		if (lapData.size() == participants.size()) {
+			for (int i = 0; i < lapData.size(); i++) {
+				LapStruct aLap = lapData.get(i);
+				Participant aParticipant = participants.get(i);
+				if (aLap.getResultStatus() != ResultStatus.finished) {
+					pos.add(new RacePosition(aLap, aParticipant));
+				} else {
+					RacePosition curPos = curStandings.getPositionForDriver(aParticipant.getDriverId());
+					if (curPos.getResultStatus() == ResultStatus.finished) {
+						pos.add(curPos);
+					} else
+						pos.add(curPos.finishRace(aLap));
+				}
 			}
-			
-			pos.sort((p1,p2)->Integer.compare(p1.getCurPosition(),p2.getCurPosition()));
-			
+
+			pos.sort((p1, p2) -> Integer.compare(p1.getCurPosition(), p2.getCurPosition()));
+
 		} else {
-			throw new IllegalArgumentException("lapData.size"+lapData.size()+" != participants.size"+participants.size()+"Data: "+lapData+" -> "+participants);
+			throw new IllegalArgumentException("lapData.size: " + lapData.size() + " != participants.size: "
+					+ participants.size() + "Data: " + lapData + " -> " + participants);
 		}
 	}
 
@@ -58,15 +76,15 @@ public final class RaceStandings {
 			return false;
 		return true;
 	}
-	
+
 	public RacePosition getPositionForDriver(Driver driverId) {
 		Objects.requireNonNull(driverId);
 		for (RacePosition racePosition : pos) {
-			if (racePosition.getDriverId()==driverId) {
+			if (racePosition.getDriverId() == driverId) {
 				return racePosition;
 			}
 		}
-		throw new IllegalArgumentException("DriverId not found: "+driverId);
+		throw new IllegalArgumentException("DriverId not found: " + driverId);
 	}
-	
+
 }

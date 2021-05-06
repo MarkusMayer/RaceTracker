@@ -42,7 +42,7 @@ public class MotionData {
 			byte[] aMotion = new byte[MOTION_DATA_SIZE];
 			bb.get(aMotion, 0, aMotion.length);
 			MotionData aM = new MotionData(aMotion);
-			System.out.println(aM);
+//			System.out.println(aM);
 			motions.add(aM);
 		}
 		return motions;
@@ -233,6 +233,7 @@ public class MotionData {
 				+ ", worldRightDirX=" + worldRightDirX + ", worldRightDirY=" + worldRightDirY + ", worldRightDirZ="
 				+ worldRightDirZ + ", gForceLateral=" + gForceLateral + ", gForceLongitudinal=" + gForceLongitudinal
 				+ ", gForceVertical=" + gForceVertical + ", yaw=" + yaw + ", pitch=" + pitch + ", roll=" + roll + "]";
+//		return worldPositionX+";"+worldPositionY+";"+worldPositionZ;
 	}
 	
 	

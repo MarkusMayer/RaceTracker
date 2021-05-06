@@ -107,5 +107,10 @@ public class SectorRecord implements Comparable<SectorRecord> {
 	public int compareTo(SectorRecord o) {
 		return getSecTime().compareTo(o.getSecTime());
 	}
+	
+	public Duration getDelta(Duration compSectorTime) {
+		return isSet() ? compSectorTime.minus(getSecTime()): Duration.ZERO;
+	}
+
 
 }

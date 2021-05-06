@@ -8,6 +8,8 @@ import java.util.Map;
 
 import raceTracker.model.enums.Driver;
 import raceTracker.model.enums.Sector;
+import raceTracker.model.gameStructs.LapStruct;
+import raceTracker.model.gameStructs.Participant;
 
 public class DriverLapHistory {
 
@@ -17,18 +19,17 @@ public class DriverLapHistory {
 	private SectorRecord bestS2 = SectorRecord.unset(Sector.sector2);
 	private SectorRecord bestS3 = SectorRecord.unset(Sector.sector3);
 
-	public void addLaps(List<RacePosition> racePos) {
-		for (RacePosition aPos : racePos) {
-			Driver d = aPos.getDriverId();
-			addLapForDriver(aPos, d);
+	public void addLaps(List<LapStruct> laps, List<Participant> participants) {
+		for (int i=0;i<laps.size();i++) {
+			addLapForDriver(laps.get(i), participants.get(i).getDriverId());
 		}
 	}
 
-	void addLapForDriver(RacePosition pos, Driver aDriver) {
+	private void addLapForDriver(LapStruct lap, Driver aDriver) {
 		if (!histories.containsKey(aDriver)) {
 			histories.put(aDriver, new LapHistory(aDriver));
 		}
-		histories.get(aDriver).addLap(pos);
+		histories.get(aDriver).addLap(lap,bestLap,bestS1,bestS2,bestS3);
 		updateRecords();
 	}
 
@@ -47,8 +48,12 @@ public class DriverLapHistory {
 		}
 	}
 
-	public Map<Driver, LapHistory> getHistories() {
+	Map<Driver, LapHistory> getHistories() {
 		return Collections.unmodifiableMap(histories);
+	}
+	
+	public LapHistory getHistoryForDriver(Driver driver) {
+		return histories.get(driver);
 	}
 
 	public LapRecord getBestLap() {
